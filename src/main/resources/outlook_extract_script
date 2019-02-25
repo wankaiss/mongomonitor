@@ -1,0 +1,144 @@
+The following Outlook macro should do the trick. Copy to a new module in Outlook's vba editor. Change the path of the worksheet as appropriate at the start of the macro.
+
+Note that the macro will fill the columns of the worksheet starting at A in the order the elements required appear in the list above.
+
+Select the messages you wish to process and run the macro. In Outlook 2010 you may have to use selfcert.exe to provide a digital signature in order to run the macro.
+
+```
+Option Explicit
+
+Sub CopyToExcel()
+Dim xlApp As Object
+Dim xlWB As Object
+Dim xlSheet As Object
+Dim olItem As Outlook.MailItem
+Dim vText As Variant
+Dim sText As String
+Dim vItem As Variant
+Dim i As Long
+Dim rCount As Long
+Dim bXStarted As Boolean
+Const strPath As String = "D:\My Documents\Vehicles.xlsx" 'the path of the workbook
+
+If Application.ActiveExplorer.Selection.Count = 0 Then
+    MsgBox "No Items selected!", vbCritical, "Error"
+    Exit Sub
+End If
+On Error Resume Next
+Set xlApp = GetObject(, "Excel.Application")
+If Err <> 0 Then
+    Application.StatusBar = "Please wait while Excel source is opened ... "
+    Set xlApp = CreateObject("Excel.Application")
+    bXStarted = True
+End If
+On Error GoTo 0
+'Open the workbook to input the data
+Set xlWB = xlApp.Workbooks.Open(strPath)
+Set xlSheet = xlWB.Sheets("Sheet1")
+
+'Process each selected record
+ rCount = xlSheet.UsedRange.Rows.Count
+  For Each olItem In Application.ActiveExplorer.Selection
+    sText = olItem.Body
+    vText = Split(sText, Chr(13))
+    'Find the next empty line of the worksheet
+     rCount = rCount + 1
+    'Check each line of text in the message body
+    For i = UBound(vText) To 0 Step -1
+      If InStr(1, vText(i), "Source:") > 0 Then
+            vItem = Split(vText(i), Chr(58))
+            xlSheet.Range("A" & rCount) = Trim(vItem(1))
+        End If
+
+        If InStr(1, vText(i), "Customer Name:") > 0 Then
+            vItem = Split(vText(i), Chr(58))
+            xlSheet.Range("B" & rCount) = Trim(vItem(1))
+        End If
+
+        If InStr(1, vText(i), "Customer Email:") > 0 Then
+            vItem = Split(vText(i), Chr(58))
+            xlSheet.Range("C" & rCount) = Trim(vItem(1))
+        End If
+
+        If InStr(1, vText(i), "Customer Phone:") > 0 Then
+            vItem = Split(vText(i), Chr(58))
+            xlSheet.Range("D" & rCount) = Trim(vItem(1))
+        End If
+
+        If InStr(1, vText(i), "Move Date:") > 0 Then
+            vItem = Split(vText(i), Chr(58))
+            xlSheet.Range("E" & rCount) = Trim(vItem(1))
+        End If
+
+        If InStr(1, vText(i), "Origin City:") > 0 Then
+            vItem = Split(vText(i), Chr(58))
+            xlSheet.Range("F" & rCount) = Trim(vItem(1))
+        End If
+
+        If InStr(1, vText(i), "Origin State:") > 0 Then
+            vItem = Split(vText(i), Chr(58))
+            xlSheet.Range("G" & rCount) = Trim(vItem(1))
+        End If
+
+        If InStr(1, vText(i), "Origin Zip:") > 0 Then
+            vItem = Split(vText(i), Chr(58))
+            xlSheet.Range("H" & rCount) = Trim(vItem(1))
+        End If
+
+        If InStr(1, vText(i), "Destination City:") > 0 Then
+            vItem = Split(vText(i), Chr(58))
+            xlSheet.Range("I" & rCount) = Trim(vItem(1))
+        End If
+
+        If InStr(1, vText(i), "Destination State:") > 0 Then
+            vItem = Split(vText(i), Chr(58))
+            xlSheet.Range("J" & rCount) = Trim(vItem(1))
+        End If
+
+        If InStr(1, vText(i), "Destination Zip:") > 0 Then
+            vItem = Split(vText(i), Chr(58))
+            xlSheet.Range("K" & rCount) = Trim(vItem(1))
+        End If
+
+        If InStr(1, vText(i), "Vehicle Type:") > 0 Then
+            vItem = Split(vText(i), Chr(58))
+            xlSheet.Range("L" & rCount) = Trim(vItem(1))
+        End If
+
+        If InStr(1, vText(i), "Vehicle Year:") > 0 Then
+            vItem = Split(vText(i), Chr(58))
+            xlSheet.Range("M" & rCount) = Trim(vItem(1))
+        End If
+
+        If InStr(1, vText(i), "Vehicle Make:") > 0 Then
+            vItem = Split(vText(i), Chr(58))
+            xlSheet.Range("N" & rCount) = Trim(vItem(1))
+        End If
+
+        If InStr(1, vText(i), "Vehicle Model:") > 0 Then
+            vItem = Split(vText(i), Chr(58))
+            xlSheet.Range("O" & rCount) = Trim(vItem(1))
+        End If
+
+        If InStr(1, vText(i), "Vehicle Condition:") > 0 Then
+            vItem = Split(vText(i), Chr(58))
+            xlSheet.Range("P" & rCount) = Trim(vItem(1))
+        End If
+
+        If InStr(1, vText(i), "Comments:") > 0 Then
+            vItem = Split(vText(i), Chr(58))
+            xlSheet.Range("Q" & rCount) = Trim(vItem(1))
+        End If
+    Next i
+    xlWB.Save
+Next olItem
+xlWB.Close SaveChanges:=True
+If bXStarted Then
+    xlApp.Quit
+End If
+Set xlApp = Nothing
+Set xlWB = Nothing
+Set xlSheet = Nothing
+Set olItem = Nothing
+End Sub
+```
